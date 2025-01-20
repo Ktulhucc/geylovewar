@@ -1,0 +1,588 @@
+
+repeat wait() until game:IsLoaded()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/DevSoGod/MyScript/main/library"))()
+local Window = library:CreateWindow("By Ktulhu || Gey love war")
+local Tab = Window:CreateTab("Main")
+local Sector = Tab:CreateSector("General", "left")
+
+
+Sector:AddButton("rpg naxui key G", function()
+   
+    for i = 1, 50 do 
+        local UserInputService = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
+        local camera = workspace.Camera
+        local playerName = game:GetService("Players").LocalPlayer.Name
+        local isFiring = false 
+
+        
+        local function fireQuickLagRocket()
+            local fireRocketVector = camera.CFrame.LookVector
+            local fireRocketPosition = camera.CFrame.Position
+
+            
+            game:GetService("ReplicatedStorage").RocketSystem.Events.FireRocket:InvokeServer(
+                fireRocketVector, workspace[playerName].RPG, workspace[playerName].RPG, fireRocketPosition
+            )
+
+            
+            local fireRocketClientTable = {
+                ["expShake"] = {["fadeInTime"] = 0.05, ["magnitude"] = 3, ["rotInfluence"] = {0.4, 0, 0.4}, ["fadeOutTime"] = 0.5, ["posInfluence"] = {1, 1, 0}, ["roughness"] = 3},
+                ["gravity"] = Vector3.new(0, -20, 0),
+                ["HelicopterDamage"] = 450,
+                ["FireRate"] = 15,
+                ["VehicleDamage"] = 350,
+                ["ExpName"] = "RPG",
+                ["RocketAmount"] = 333,
+                ["ExpRadius"] = 12,
+                ["BoatDamage"] = 300,
+                ["TankDamage"] = 300,
+                ["Acceleration"] = 8,
+                ["ShieldDamage"] = 11170,
+                ["Distance"] = 400000,
+                ["PlaneDamage"] = 500,
+                ["GunshipDamage"] = 170,
+                ["velocity"] = 200,
+                ["ExplosionDamage"] = 120
+            }
+
+            local fireRocketClientInstance1 = game:GetService("ReplicatedStorage").RocketSystem.Rockets["RPG Rocket"]
+            local fireRocketClientInstance2 = workspace[playerName].RPG
+            local fireRocketClientInstance3 = workspace[playerName].RPG
+
+            -- Событие клиента для запуска ракеты
+            game:GetService("ReplicatedStorage").RocketSystem.Events.FireRocketClient:Fire(
+                camera.CFrame.Position,
+                camera.CFrame.LookVector,
+                fireRocketClientTable,
+                fireRocketClientInstance1,
+                fireRocketClientInstance2,
+                fireRocketClientInstance3,
+                game:GetService("Players").LocalPlayer,
+                nil,
+                { [1] = camera:FindFirstChild("RPG") }
+            )
+        end
+
+   
+        local function startFiring()
+            isFiring = true
+            task.spawn(function()
+                while isFiring do
+                    fireQuickLagRocket()
+                    task.wait(1 / 999999)
+                end
+            end)
+        end
+
+        local function stopFiring()
+            isFiring = false
+        end
+
+       
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if input.KeyCode == Enum.KeyCode.G and not gameProcessed then
+                startFiring()
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input, gameProcessed)
+            if input.KeyCode == Enum.KeyCode.G and not gameProcessed then
+                stopFiring()
+            end
+        end)
+    end
+end)
+
+
+local function fireRocket()
+   
+    local Weapon = game:GetService("Players").LocalPlayer.Character:FindFirstChild(getgenv().Weapon) or game:GetService("Players").LocalPlayer.Backpack:FindFirstChild(getgenv().Weapon)
+    local Mouse = game.Players.LocalPlayer:GetMouse()
+
+
+    if Weapon then
+        local args = {
+            [1] = Vector3.new(0, 0, 0),  
+            [2] = Weapon,                 
+            [3] = Weapon,                 
+            [4] = Mouse.Hit.Position     
+        }
+
+        
+        Weapon.Parent = game.Players.LocalPlayer.Character
+        
+       
+        local RN = tostring(game:GetService("ReplicatedStorage"):WaitForChild("RocketSystem"):WaitForChild("Events"):WaitForChild("FireRocket"):InvokeServer(unpack(args)))
+        
+       
+        Weapon.Parent = game.Players.LocalPlayer.Backpack
+
+      
+        if Mouse.Target then
+            local args = {
+                [1] = Mouse.Hit.Position,      
+                [2] = Vector3.new(0, 0, 0),   
+                [3] = Weapon,                
+                [4] = Weapon,                
+                [5] = Mouse.Target,           
+                [7] = game.Players.LocalPlayer.Name.."Rocket"..RN  
+            }
+
+           
+            game:GetService("ReplicatedStorage"):WaitForChild("RocketSystem"):WaitForChild("Events"):WaitForChild("RocketHit"):FireServer(unpack(args))
+        end
+    end
+end
+
+
+Sector:AddButton("INF AMMO", function()
+
+    _G.skurilpizdu = true
+
+    task.spawn(function()
+        while _G.skurilpizdu do
+            task.wait()
+            local player = game:GetService("Players").LocalPlayer
+            local backpack = player.Backpack
+
+            for _, v in pairs(backpack:GetDescendants()) do
+                if v.Name == "Ammo" and v.Parent.Name == "Variaveis" then
+                    v.Value = math.huge -- Устанавливаем бесконечное количество
+                end
+            end
+        end
+    end)
+end)
+
+Sector:AddButton("no fall dmg", function()
+   
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    local freefall = replicatedStorage:FindFirstChild("Freefall")
+    if freefall then
+        freefall:Destroy()
+    else
+        print("Freefall not found")
+    end
+
+    local acsEngine = replicatedStorage:FindFirstChild("ACS_Engine")
+    if acsEngine then
+        local events = acsEngine:FindFirstChild("Events")
+        if events then
+            local fdmg = events:FindFirstChild("FDMG")
+            if fdmg then
+                fdmg:Destroy()
+            else
+                print("FDMG not found in Events")
+            end
+        else
+            print("Events not found in ACS_Engine")
+        end
+    else
+        print("ACS_Engine not found in ReplicatedStorage")
+    end
+end)
+
+
+
+local Sector = Tab:CreateSector("Visual", "right")
+
+
+Sector:AddButton("cball", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    
+    local function createRainbowBall()
+       
+        local ball = Instance.new("Part")
+        ball.Shape = Enum.PartType.Ball
+        ball.Size = Vector3.new(3, 3, 3)  
+        ball.Position = character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)  
+        ball.Anchored = false  
+        ball.CanCollide = false 
+        ball.Transparency = 0.5  
+        ball.Parent = workspace  
+        ball.Name = "RainbowBall"  
+
+        
+        local bodyPosition = Instance.new("BodyPosition")
+        bodyPosition.MaxForce = Vector3.new(10000, 10000, 10000)  
+        bodyPosition.D = 1000  
+        bodyPosition.P = 10000  
+        bodyPosition.Parent = ball
+
+      
+        local bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.MaxTorque = Vector3.new(40000, 40000, 40000)  
+        bodyGyro.CFrame = ball.CFrame
+        bodyGyro.Parent = ball
+
+       
+        local colorCycle = 0
+        game:GetService("RunService").Heartbeat:Connect(function()
+           
+            colorCycle = colorCycle + 0.01
+            if colorCycle > 1 then
+                colorCycle = 0
+            end
+
+         
+            ball.Color = Color3.fromHSV(colorCycle, 1, 1)
+
+            
+            bodyPosition.Position = character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+            
+            
+            bodyGyro.CFrame = CFrame.new(ball.Position, character.HumanoidRootPart.Position)
+        end)
+    end
+
+ 
+    createRainbowBall()
+
+ 
+    player.CharacterAdded:Connect(function(newCharacter)
+        character = newCharacter
+        createRainbowBall()
+    end)
+end)
+
+
+Sector:AddButton("Rainbow", function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+
+   
+    local function makeCharacterRainbow()
+        local time = tick() 
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+            
+                part.Color = Color3.fromHSV(math.sin(time + _ * 2) * 0.5 + 0.5, 1, 1)
+            end
+        end
+    end
+
+
+    local function makeCharacterTransparent()
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0.5 
+            end
+        end
+    end
+
+
+    game:GetService("RunService").Heartbeat:Connect(function()
+        makeCharacterRainbow()
+        makeCharacterTransparent()
+    end)
+
+    player.CharacterAdded:Connect(function(newCharacter)
+        character = newCharacter
+        game:GetService("RunService").Heartbeat:Connect(function()
+            makeCharacterRainbow()
+            makeCharacterTransparent()
+        end)
+    end)
+end)
+
+local function changeMaterialToForceField(object)
+    if object:IsA("BasePart") then
+        object.Material = Enum.Material.ForceField
+        object.Color = Color3.fromRGB(255, 0, 0) 
+    end
+end 
+
+local function onChildAdded(child)
+    changeMaterialToForceField(child)
+end
+
+local function onDescendantAdded(descendant)
+    changeMaterialToForceField(descendant)
+end
+
+
+local Sector = Tab:CreateSector("Важно", "left")
+
+
+Sector:AddButton("Рецепт оладушек", function(inputText)
+    local player = game:GetService("Players").LocalPlayer
+    
+    local recipeMessage = "Короче Мука пшенич - 250 г\nМолоко - 200 мл\nМасло раст - 3 ст ложки\nЯйцо - 1 шт\nСахар - 2 ст ложки\nСода - 0.5 ч ложки\nЛимонная кислота - 1/4 ч ложки\nСоль - 0.5 ч ложки."
+    
+    player:Kick(recipeMessage)
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local Tab = Window:CreateTab("Setting/Misc")
+local Sector = Tab:CreateSector("Section1", "left")
+
+Sector:AddButton("Nameless admin", function()
+    -- Загрузка и выполнение скрипта с URL
+    local success, err = pcall(function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source'))()
+    end)
+    
+    if not success then
+        -- Если произошла ошибка, выводим сообщение об ошибке
+        print("Ошибка при загрузке Nameless admin: " .. err)
+    else
+        print("Nameless admin успешно загружен и выполнен!")
+    end
+end)
+
+Sector:AddButton("Rejoin" , function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
+end)
+Sector:AddButton("ResetCamera" , function()
+    game:GetService("Workspace").CurrentCamera:Destroy()
+    wait(.1)
+    game:GetService("Workspace").CurrentCamera.CameraSubject = game:GetService("Players").LocalPlayer.Character.Humanoid
+    game:GetService("Workspace").CurrentCamera.CameraType = "Custom"
+    game:GetService("Players").LocalPlayer.CameraMinZoomDistance = .5
+    game:GetService("Players").LocalPlayer.CameraMaxZoomDistance = 100000
+    game:GetService("Players").LocalPlayer.CameraMode = "Classic"
+end)
+Sector:AddButton("InstantProximityPrompt" , function()
+    game:GetService("ProximityPromptService").PromptButtonHoldBegan:Connect(function(prompt)
+        prompt.HoldDuration = 0
+    end)
+end)
+spawn(function()
+    pcall(function()
+        while wait() do
+            pcall(function()
+                if _G.JumpPower then
+                    pcall(function()
+                        wait()
+                        local HumanModCons = {}
+                        local Char = game.Players.LocalPlayer.Character or workspace:FindFirstChild(game.Players.LocalPlayer.Name)
+                        local Human = Char and Char:FindFirstChildWhichIsA("Humanoid")
+                        local function JumpPowerChange()
+                            if Char and Human and _G.JumpPower then
+                                if game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').UseJumpPower then
+                                    game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').JumpPower = tonumber(_G.Jump)
+                                else
+                                    game.Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').JumpHeight  = tonumber(_G.Jump)
+                                end
+                            end
+                        end
+                        JumpPowerChange()
+                        HumanModCons.jpLoop = (HumanModCons.jpLoop and HumanModCons.jpLoop:Disconnect() and false) or Human:GetPropertyChangedSignal("JumpPower"):Connect(JumpPowerChange)
+                        HumanModCons.jpCA = (HumanModCons.jpCA and HumanModCons.jpCA:Disconnect() and false) or game.Players.LocalPlayer.CharacterAdded:Connect(function(v)
+                            Char, Human = v, v:WaitForChild("Humanoid")
+                            JumpPowerChange()
+                            HumanModCons.jpLoop = (HumanModCons.jpLoop and HumanModCons.jpLoop:Disconnect() and false) or Human:GetPropertyChangedSignal("JumpPower"):Connect(JumpPowerChange)
+                        end)
+                        wait(9e9)
+                    end)
+                end
+            end)
+        end
+    end)
+end)
+spawn(function()
+    pcall(function()
+        while wait() do
+            pcall(function()
+                if _G.WalkSpeed then
+                    pcall(function()
+                        wait()
+                        local HumanModCons = {}
+                        local Char = game.Players.LocalPlayer.Character or workspace:FindFirstChild(game.Players.LocalPlayer.Name)
+                        local Human = Char and Char:FindFirstChildWhichIsA("Humanoid")
+                        local function WalkSpeedChange()
+                            if Char and Human and _G.WalkSpeed then
+                                Human.WalkSpeed = tonumber(_G.Speed)
+                            end
+                        end
+                        WalkSpeedChange()
+                        HumanModCons.wsLoop = (HumanModCons.wsLoop and HumanModCons.wsLoop:Disconnect() and false) or Human:GetPropertyChangedSignal("WalkSpeed"):Connect(WalkSpeedChange)
+                        HumanModCons.wsCA = (HumanModCons.wsCA and HumanModCons.wsCA:Disconnect() and false) or game.Players.LocalPlayer.CharacterAdded:Connect(function(v)
+                            Char, Human = v, v:WaitForChild("Humanoid")
+                            WalkSpeedChange()
+                            HumanModCons.wsLoop = (HumanModCons.wsLoop and HumanModCons.wsLoop:Disconnect() and false) or Human:GetPropertyChangedSignal("WalkSpeed"):Connect(WalkSpeedChange)
+                        end)
+                        wait(9e9)
+                    end)
+                end
+            end)
+        end
+    end)
+end)
+local UIS = game:GetService("UserInputService")
+local Player = game.Players.LocalPlayer
+local Mouse = Player:GetMouse()
+function GetCharacter()
+    return game.Players.LocalPlayer.Character
+    end
+    function Teleport(pos)
+    local Char = GetCharacter()
+    if Char then
+        Char:MoveTo(pos)
+    end
+end
+UIS.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and UIS:IsKeyDown(Enum.KeyCode.LeftControl) and _G.CtrlClickTP == true then
+        Teleport(Mouse.Hit.p)
+    end
+end)
+
+local Sector = Tab:CreateSector("Section2", "Right")
+Sector:AddKeybind("Keybind GUI", "Insert",true, function()
+    for i, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+        if v:FindFirstChild("main") then
+            v.main.Visible = not v.main.Visible;
+        end
+    end
+end)
+Sector:AddToggle("CloseGuiAfterExecute", false, function(o)
+    _G.CloseGuiAfterExecute = o
+end)
+Sector:AddToggle("RejoinAfterKick", false, function(o)
+    _G.rejoinKick = o
+end)
+spawn(function()
+    getgenv().rejoin = game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(Kick)
+        if ((Kick.Name == "ErrorPrompt") and Kick:FindFirstChild("MessageArea") and Kick.MessageArea:FindFirstChild("ErrorFrame")) then
+            if _G.rejoinKick == true then
+                game:GetService("TeleportService"):Teleport(game.PlaceId)
+            end
+        end
+    end)
+end)
+
+spawn(function()
+    pcall(function()
+        while task.wait() do
+            pcall(function()
+                game:GetService("Players").LocalPlayer.DevCameraOcclusionMode = "Invisicam"
+                game:GetService("Players").LocalPlayer.CameraMaxZoomDistance = 100000
+            end)
+        end
+    end)
+end)
+spawn(function()
+    pcall(function()
+        while wait() do
+            pcall(function()
+                if _G.CloseGuiAfterExecute then
+                    pcall(function()
+                        wait()
+                        for i,v in pairs(game:GetService("CoreGui"):GetChildren()) do
+                            if v:FindFirstChild("main") then
+                                v.main.Visible = not v.main.Visible
+                            end
+                        end
+                        wait(9e9)
+                    end)
+                end
+            end)
+        end
+    end)
+end)
+spawn(function()
+    pcall(function()
+        while wait(1) do
+            pcall(function()
+                if _G.Fpscap then
+                    setfpscap(tonumber(_G.FPS))
+                end
+            end)
+        end
+    end)
+end)
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+    game:GetService("VirtualUser"):CaptureController()
+    game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+end)
+library:ConfigSystem("WarTycoon"):Load()
+while wait(1) do
+    pcall(function()
+        library:ConfigSystem("WarTycoon"):Save()
+    end)
+end
+
+
+
